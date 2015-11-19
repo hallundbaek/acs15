@@ -334,7 +334,9 @@ public class CertainBookStore implements BookStore, StockManager {
 		}
 
 		for (BookRating br : bookRating) {
-			bookMap.get(br.getISBN()).addRating(br.getRating());
+			BookStoreBook tmp = bookMap.get(br.getISBN());
+			tmp.addRating(br.getRating());
+			bookMap.put(br.getISBN(), tmp);
 		}
 	}
 
