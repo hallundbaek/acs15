@@ -130,15 +130,31 @@ public class BookStoreHTTPProxy implements BookStore {
 
 	@Override
 	public void rateBooks(Set<BookRating> bookRating) throws BookStoreException {
-		// TODO Auto-generated method stub
-		throw new BookStoreException("Not implemented");
-		
+		ContentExchange exchange = new ContentExchange();
+		String urlString = serverAddress + "/" + BookStoreMessageTag.RATEBOOKS;
+
+		String listRatingsXMLString = BookStoreUtility
+				.serializeObjectToXMLString(bookRating);
+		exchange.setMethod("POST");
+		exchange.setURL(urlString);
+		Buffer requestContent = new ByteArrayBuffer(listRatingsXMLString);
+		exchange.setRequestContent(requestContent);
+		BookStoreUtility.SendAndRecv(this.client, exchange);
 	}
 
 	@Override
 	public List<Book> getTopRatedBooks(int numBooks) throws BookStoreException {
-		// TODO Auto-generated method stub
-		throw new BookStoreException("Not implemented");
+		ContentExchange exchange = new ContentExchange();
+		String urlString = serverAddress + "/" + BookStoreMessageTag.GETTOPRATEDBOOKS;
+
+		String listNumBooksXMLString = BookStoreUtility
+				.serializeObjectToXMLString(numBooks);
+		exchange.setMethod("POST");
+		exchange.setURL(urlString);
+		Buffer requestContent = new ByteArrayBuffer(listNumBooksXMLString);
+		exchange.setRequestContent(requestContent);
+
+		return (List<Book>) BookStoreUtility.SendAndRecv(this.client, exchange);
 	}
 
 }
