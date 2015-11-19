@@ -241,7 +241,19 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 						.serializeObjectToXMLString(bookStoreResponse);
 				response.getWriter().println(listBooksxmlString);
 				break;
+
 			case GETTOPRATEDBOOKS:
+                xml = BookStoreUtility.extractPOSTDataFromRequest(request);
+                numBooks = (int) BookStoreUtility.deserializeXMLStringToObject(xml);
+				bookStoreResponse = new BookStoreResponse();
+                try {
+                    bookStoreResponse.setList(myBookStore.getTopRatedBooks(numBooks));
+                } catch (BookStoreException e) {
+                    bookStoreResponse.setException(e);
+                }
+				listBooksxmlString = BookStoreUtility
+						.serializeObjectToXMLString(bookStoreResponse);
+				response.getWriter().println(listBooksxmlString);
 				break;
 
 			default:
