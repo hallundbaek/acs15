@@ -11,13 +11,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.acertainbookstore.business.*;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import com.acertainbookstore.business.BookCopy;
-import com.acertainbookstore.business.BookEditorPick;
-import com.acertainbookstore.business.CertainBookStore;
-import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
 import com.acertainbookstore.utils.BookStoreMessageTag;
@@ -230,7 +227,35 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 						.serializeObjectToXMLString(bookStoreResponse);
 				response.getWriter().println(listBooksxmlString);
 				break;
-				
+
+			case RATEBOOKS:
+                xml = BookStoreUtility.extractPOSTDataFromRequest(request);
+                Set<BookRating> ratingSet = (Set<BookRating>) BookStoreUtility.deserializeXMLStringToObject(xml);
+                bookStoreResponse = new BookStoreResponse();
+                try {
+                    myBookStore.rateBooks(ratingSet);
+                } catch (BookStoreException e) {
+                    bookStoreResponse.setException(e);
+                }
+				listBooksxmlString = BookStoreUtility
+						.serializeObjectToXMLString(bookStoreResponse);
+				response.getWriter().println(listBooksxmlString);
+				break;
+
+			case GETTOPRATEDBOOKS:
+                xml = BookStoreUtility.extractPOSTDataFromRequest(request);
+                numBooks = (int) BookStoreUtility.deserializeXMLStringToObject(xml);
+				bookStoreResponse = new BookStoreResponse();
+                try {
+                    bookStoreResponse.setList(myBookStore.getTopRatedBooks(numBooks));
+                } catch (BookStoreException e) {
+                    bookStoreResponse.setException(e);
+                }
+				listBooksxmlString = BookStoreUtility
+						.serializeObjectToXMLString(bookStoreResponse);
+				response.getWriter().println(listBooksxmlString);
+				break;
+
 			default:
 				System.out.println("Unhandled message tag");
 				break;
