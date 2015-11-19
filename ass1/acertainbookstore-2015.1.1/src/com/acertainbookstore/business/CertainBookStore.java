@@ -5,6 +5,8 @@ package com.acertainbookstore.business;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -277,7 +279,29 @@ public class CertainBookStore implements BookStore, StockManager {
 	@Override
 	public synchronized List<Book> getTopRatedBooks(int numBooks)
 			throws BookStoreException {
-		throw new BookStoreException("Not implemented");
+		if(numBooks < 0) {
+			throw new BookStoreException(BookStoreConstants.INVALID + numBooks);
+		}
+		List<Book> requested = new ArrayList<Book>();
+		if(numBooks <= bookMap.size()) {
+			for(Book b : bookMap.values()) {
+				requested.add(new ImmutableBook(b));
+			}
+			return requested;
+		}
+	
+		List<BookStoreBook> sortedBooks = new ArrayList<BookStoreBook>(bookMap.values());
+		Collections.sort(sortedBooks, new Comparator<BookStoreBook>() {
+			@Override
+			public int compare(BookStoreBook b1, BookStoreBook b2) {
+				Float b = new Float(b1.getAverageRating());
+				return b.compareTo(new Float(b2.getAverageRating()));
+			}
+		});
+		for(int i = 0; i<  numBooks; i++) {
+			requested.add(new ImmutableBook(sortedBooks.get(i)));
+		}
+		return requested;
 	}
 
 	@Override
@@ -289,7 +313,29 @@ public class CertainBookStore implements BookStore, StockManager {
 	@Override
 	public synchronized void rateBooks(Set<BookRating> bookRating)
 			throws BookStoreException {
-		throw new BookStoreException("Not implemented");
+		if (bookRating == null) {
+			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
+		}
+		for (BookRating br : bookRating) {
+			int rating = br.getRating();
+			int isbn = br.getISBN();
+			if (BookStoreUtility.isInvalidRating(rating)) {
+				throw new BookStoreException(BookStoreConstants.RATING + rating
+						+ BookStoreConstants.INVALID + BookStoreConstants.ISBN
+						+ isbn);
+			}
+			if (BookStoreUtility.isInvalidISBN(isbn))
+				throw new BookStoreException(BookStoreConstants.ISBN + isbn
+						+ BookStoreConstants.INVALID);
+			if (!bookMap.containsKey(isbn))
+				throw new BookStoreException(BookStoreConstants.ISBN + isbn
+						+ BookStoreConstants.NOT_AVAILABLE);
+
+		}
+
+		for (BookRating br : bookRating) {
+			bookMap.get(br.getISBN()).addRating(br.getRating());
+		}
 	}
 
 	public synchronized void removeAllBooks() throws BookStoreException {

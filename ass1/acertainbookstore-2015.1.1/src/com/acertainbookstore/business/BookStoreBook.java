@@ -1,5 +1,7 @@
 package com.acertainbookstore.business;
 
+import java.util.Comparator;
+
 import com.acertainbookstore.utils.BookStoreUtility;
 
 /**
@@ -8,13 +10,19 @@ import com.acertainbookstore.utils.BookStoreUtility;
  * StockBook interface.
  * 
  */
-public class BookStoreBook extends ImmutableBook {
+public class BookStoreBook extends ImmutableBook implements Comparator<BookStoreBook>{
 	private int numCopies;
 	private long totalRating;
 	private long timesRated;
 	private long saleMisses;
 	private boolean editorPick;
-
+	
+	
+	public int compare(BookStoreBook b1,BookStoreBook b2) {
+		Float b = new Float(b1.getAverageRating());
+		return b.compareTo(new Float(b2.getAverageRating()));
+	}
+	
 	/**
 	 * Constructor to create a book object
 	 */
@@ -219,5 +227,4 @@ public class BookStoreBook extends ImmutableBook {
 		return new BookStoreBook(this.getISBN(), new String(this.getTitle()),
 				new String(this.getAuthor()), this.getPrice(), this.numCopies);
 	}
-
 }

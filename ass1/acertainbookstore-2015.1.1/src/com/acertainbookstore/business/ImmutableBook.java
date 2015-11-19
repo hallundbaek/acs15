@@ -27,6 +27,13 @@ public class ImmutableBook implements Book {
 		this.price = price;
 	}
 
+	public ImmutableBook(Book book) {
+		this.ISBN = book.getISBN();
+		this.title = book.getTitle();
+		this.author = book.getAuthor();
+		this.price = book.getPrice();
+	} 
+	
 	public int getISBN() {
 		return ISBN;
 	}

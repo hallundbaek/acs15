@@ -1,5 +1,7 @@
 package com.acertainbookstore.business;
 
+import com.acertainbookstore.utils.BookStoreException;
+
 /**
  * Simple class for giving book ratings.
  * 
@@ -17,6 +19,16 @@ public class BookRating {
 	public BookRating(int ISBN, int rating) {
 		this.ISBN = ISBN;
 		this.rating = rating;
+	}
+
+	/**
+	 * Checks that the rating is within the boundaries
+	 * 
+	 * @param rating
+	 * @throws BookStoreException
+	 */
+	public void valid(int rating) throws BookStoreException {
+
 	}
 
 	/**

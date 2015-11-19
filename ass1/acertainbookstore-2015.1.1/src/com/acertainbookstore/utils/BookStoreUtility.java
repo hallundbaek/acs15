@@ -30,7 +30,7 @@ public final class BookStoreUtility {
 	}
 
 	public static boolean isInvalidRating(int rating) {
-		return (rating < 0 || rating > 5);
+		return (rating < BookStoreConstants.MIN_RATING || rating > BookStoreConstants.MAX_RATING);
 	}
 
 	public static boolean isInvalidNoCopies(int copies) {

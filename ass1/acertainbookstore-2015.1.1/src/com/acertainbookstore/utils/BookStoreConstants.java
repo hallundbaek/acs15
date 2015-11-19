@@ -33,4 +33,7 @@ public final class BookStoreConstants {
 
 	public static final String PROPERTY_KEY_LOCAL_TEST = "localtest";
 	public static final String PROPERTY_KEY_SERVER_PORT = "port";
+	
+	public static final int MAX_RATING = 5;
+	public static final int MIN_RATING = 0;
 }
