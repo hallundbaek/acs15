@@ -9,8 +9,11 @@ import com.acertainbookstore.utils.BookStoreConstants;
 /**
  * Starts the bookstore HTTP server that the clients will communicate with.
  */
-public class BookStoreHTTPServer {
-
+public class BookStoreHTTPServer implements Runnable
+{
+    public void run() {
+        main(null);
+    }
 	/**
 	 * @param args
 	 */
@@ -27,9 +30,8 @@ public class BookStoreHTTPServer {
 				System.err.println(ex);
 			}
 		}
-		if (BookStoreHTTPServerUtility.createServer(listen_on_port, handler)) {
-			;
-		}
+        if (BookStoreHTTPServerUtility.createServer(listen_on_port, handler)) {
+        }
 	}
 
 }

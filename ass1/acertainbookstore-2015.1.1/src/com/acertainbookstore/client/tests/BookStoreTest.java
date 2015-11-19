@@ -26,19 +26,25 @@ import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
+import com.acertainbookstore.server.BookStoreHTTPServer;
 
 /**
  * Test class to test the BookStore interface
  * 
  */
-public class BookStoreTest {
+public abstract class BookStoreTest {
 
 	private static final int TEST_ISBN = 3044560;
 	private static final int TEST_ISBN_2 = 305000;
 	private static final int NUM_COPIES = 5;
-	private static boolean localTest = true;
+	private static boolean localTest = false;
 	private static StockManager storeManager;
 	private static BookStore client;
+  private static Thread bookStoreHTTPServer;
+
+  protected BookStoreTest(boolean localTest) {
+    this.localTest = localTest;
+  }
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
@@ -52,6 +58,8 @@ public class BookStoreTest {
 				storeManager = store;
 				client = store;
 			} else {
+				bookStoreHTTPServer = new Thread(new BookStoreHTTPServer());
+                bookStoreHTTPServer.start();
 				storeManager = new StockManagerHTTPProxy(
 						"http://localhost:8081/stock");
 				client = new BookStoreHTTPProxy("http://localhost:8081");
@@ -595,7 +603,11 @@ public class BookStoreTest {
 		if (!localTest) {
 			((BookStoreHTTPProxy) client).stop();
 			((StockManagerHTTPProxy) storeManager).stop();
+            try {
+                bookStoreHTTPServer.stop();
+            } catch (Exception e) {
+            }
 		}
 	}
-
 }
+
