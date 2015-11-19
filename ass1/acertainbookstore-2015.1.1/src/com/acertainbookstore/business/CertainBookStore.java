@@ -283,7 +283,7 @@ public class CertainBookStore implements BookStore, StockManager {
 			throw new BookStoreException(BookStoreConstants.INVALID + numBooks);
 		}
 		List<Book> requested = new ArrayList<Book>();
-		if(numBooks <= bookMap.size()) {
+		if(numBooks >= bookMap.size()) {
 			for(Book b : bookMap.values()) {
 				requested.add(new ImmutableBook(b));
 			}
@@ -294,10 +294,11 @@ public class CertainBookStore implements BookStore, StockManager {
 		Collections.sort(sortedBooks, new Comparator<BookStoreBook>() {
 			@Override
 			public int compare(BookStoreBook b1, BookStoreBook b2) {
-				Float b = new Float(b1.getAverageRating());
-				return b.compareTo(new Float(b2.getAverageRating()));
+				Float b = new Float(b2.getAverageRating());
+				return b.compareTo(new Float(b1.getAverageRating()));
 			}
 		});
+	
 		for(int i = 0; i<  numBooks; i++) {
 			requested.add(new ImmutableBook(sortedBooks.get(i)));
 		}
