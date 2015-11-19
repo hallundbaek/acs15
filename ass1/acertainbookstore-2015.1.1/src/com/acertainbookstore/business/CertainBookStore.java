@@ -318,7 +318,6 @@ public class CertainBookStore implements BookStore, StockManager {
 		}
 		for (BookRating br : bookRating) {
 			int rating = br.getRating();
-			System.out.println(rating);
 			int isbn = br.getISBN();
 			if (BookStoreUtility.isInvalidRating(rating)) {
 				throw new BookStoreException(BookStoreConstants.RATING + rating
