@@ -82,6 +82,7 @@
     In the case that a machine goes down, the given request will time out and the user will be notified of the error. As there is no request for redundancy in the abstraction, this way of handling it is acceptable.
     The only centralized component in the design is the data-structure at the individual user. And as explained before, any changes done in the form of adding or removing machines will be relayed back to the user in the next request.
   \item For the API, we will denote $n = \lceil \lg (SK) \rceil$, \texttt{\&} will denote bitwise AND, \texttt{>>} denotes bit-shift and lastly all addresses and $n$ is considered as unsigned integers.\\
+    The read will address find the machines by masking the $n$ first bits of the given address, the object at this array will expose a function \texttt{requestRead(int)} that will send the request and \texttt{response} which will loop until a response is given or timeout is reached. The response can hold a function that needs to be applied to the current array of machines.
     \begin{lstlisting}[language=Ruby, caption={READ}]
 read(addr)
   machine = machines[addr & (n^2 - 1)]
@@ -95,6 +96,7 @@ read(addr)
     time out:
       raise machineTimeoutException
     \end{lstlisting}
+    The write is more or less the same as the read, only differing in the added functionality that the user supplies the value to be written.
     \begin{lstlisting}[language=Ruby, caption={WRITE}]
 write(addr, value)
   machine = machines[addr & (n^2 - 1)]
