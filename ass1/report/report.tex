@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+cd\documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[fleqn]{amsmath}
 \usepackage{amssymb}
@@ -80,8 +80,10 @@
 
 \section{Techniques for Performance}
 \begin{enumerate}
-\item 
-\item 
+
+\item Utilizing concurrency will not influence the latency of unit task a computer system performs, where a unit task is task that has no dependencies on other task the system performs. However, for system tasks that perform several concurrent unit tasks as subtask will have its latency reduced by as some of these will be performed simultaneously. The latency reduction only holds when the overhead of performing unit tasks concurrently is smaller than the gain from concurrently.
+\item \paragraph{Dallying} is when a system tasks wait with performing a subtask until
+\paragraph{Batching} is when a system task performs a subtask on a group on of request. An example of batching is when acknowledgements are piggybacked in TCP.
 \item 
 \end{enumerate}
 \section{Discussion for Architecture}
