@@ -117,9 +117,21 @@ write(addr, value)
 \end{enumerate}
 \section{Techniques for Performance}
 \begin{enumerate}
-\item 
-\item 
-\item 
+
+\item Utilizing concurrency will not influence the latency of unit task a computer system performs, where a unit task is task that has no dependencies on other task the system performs. However, for system tasks that perform several concurrent unit tasks as subtask will have its latency reduced by as some of these will be performed simultaneously. The latency reduction only holds when the overhead of performing unit tasks concurrently is smaller than the gain from concurrent execution.
+\item \paragraph{Dallying} is when a system tasks wait with performing a subtask either to batch the request together with later requests or to completely avoid performing the request. An example of dallying is lazy evalutation of programs, where evalutation of expression are deffered until their needed by other computations.
+\paragraph{Batching} is when a system task performs a subtask on a group on of requests intead of a single request. Batching is often deployed as an optimization for expensive subtasks such as communicating over a network or lookups in an enormous table. An example of batching is when acknowledgements are piggybacked in TCP.
+\item Chaching is an example of fast-path optimization. Cahching makes retriaval time of previously processed request faster by storing their results, thereby creating a fast path for cached results.
 \end{enumerate}
 \section{Discussion for Architecture}
+\subsection{Implementation and testing describtion}
+\paragraph{Testing} is performed on the implemeneted buisness logic both as local calls (LC) and remote procedure calls (RPC), only by changing the setup of the testing class. This is reflected in code where the implementation of the unite test are in the abstract class, \texttt{BookStoreTest}, which is extended by the \texttt{HTTPTest} class and the \texttt{LocalTest} class which perform the before mentioned setup to handle LC or RPC respictively. For RPC the implementation spawns a new java thread that runs the server before the class is construcnted, and then sends a stop to the server as part of the tear down of the class. All the implemented tests check that the state of the bookstore after a mutation is performed is consistent with how the bookstore looked before the mutation.
+We have implemented the following test to demostrate correctness of the implemented \textit{rateBooks} method:
+\begin{itemize}
+\item \textit{testRateNoneExistingISBN} test that only books that are in the store can be rated. Rating a book not present in the bookstore throws an error message and the after state should therefore be the same as the before state, as none of the rating should be committed.
+\item \textit{testRateNonsenseISBN} test that only valid ISBN can be used to rate books, in the implementation of \texttt{rateBooks} this check is performed to before checking whether the book is present in the bookstore. For the same reasoning as with \texttt{testRateNoneExistingISBN} testing method the state of the bookstore should not change after attempting to rate a nonsense isbn.
+\item \textit{testGiveInvalidRating} test that only valid ratings can be given, that is ratings between one and five inclusiive. The bookstores state should not change if an invalid rating is given.
+\item \textit{testGiveValidRating} test that given valid ratings of books in the store the rating of the book is aggregated. To perform this test a mutable book is added to the bookstore, this book is then rated and checked that the rating of this book is upadted expected. Finally we remove the book from the bookstore and check that nothing else has changed.
+\end{itemize}
+\paragraph{Implemntation}
 \end{document}
