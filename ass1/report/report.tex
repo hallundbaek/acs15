@@ -77,7 +77,11 @@
 \begin{document}
 \maketitle
 \section{Fundamental Abstractions}
-
+\begin{enumerate}
+  \item Let us assume that at initialization the administrator of the system knows, how much the system might be scaled up, let us call this $S$, thus the total amount of machines ever scaled to will be at most $SK$. We will then have an array of size $SK$, this will hold communication info necessary for read and write to the individual machines. This array along with its information will reside in the api of the user, giving them direct access to the individual machines. Upon scaling up the new machine will broadcast out to all other machines, which will then update the datastructure at the user upon the next read or write request.\\
+    In the case that a machine goes down, the given request will time out and the user will be notified of the error. As there is no request for redundancy in the abstraction, this way of handling it is acceptable.
+    The only centralized component in the design is the datastructure at the individual user. And as explained before, any changes done in the form of adding or removing machines will be relayed back to the user in the next request.
+\end{enumerate}
 \section{Techniques for Performance}
 \begin{enumerate}
 \item 

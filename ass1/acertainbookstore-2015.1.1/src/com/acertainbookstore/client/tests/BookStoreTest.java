@@ -8,25 +8,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.BookRating;
-import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.business.ImmutableStockBook;
 import com.acertainbookstore.business.StockBook;
-import com.acertainbookstore.client.BookStoreHTTPProxy;
-import com.acertainbookstore.client.StockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
-import com.acertainbookstore.server.BookStoreHTTPServer;
 
 /**
  * Test class to test the BookStore interface
@@ -37,38 +31,14 @@ public abstract class BookStoreTest {
 	private static final int TEST_ISBN = 3044560;
 	private static final int TEST_ISBN_2 = 305000;
 	private static final int NUM_COPIES = 5;
-	private static boolean localTest = false;
 	private static StockManager storeManager;
 	private static BookStore client;
-  private static Thread bookStoreHTTPServer;
 
-  protected BookStoreTest(boolean localTest) {
-    this.localTest = localTest;
+  protected BookStoreTest(BookStore client, StockManager storeManager) {
+    this.client = client;
+    this.storeManager = storeManager;
   }
 
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		try {
-			String localTestProperty = System
-					.getProperty(BookStoreConstants.PROPERTY_KEY_LOCAL_TEST);
-			localTest = (localTestProperty != null) ? Boolean
-					.parseBoolean(localTestProperty) : localTest;
-			if (localTest) {
-				CertainBookStore store = new CertainBookStore();
-				storeManager = store;
-				client = store;
-			} else {
-				bookStoreHTTPServer = new Thread(new BookStoreHTTPServer());
-                bookStoreHTTPServer.start();
-				storeManager = new StockManagerHTTPProxy(
-						"http://localhost:8081/stock");
-				client = new BookStoreHTTPProxy("http://localhost:8081");
-			}
-			storeManager.removeAllBooks();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	/**
 	 * Helper method to add some books
@@ -595,19 +565,6 @@ public abstract class BookStoreTest {
 		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
 
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws BookStoreException {
-		storeManager.removeAllBooks();
-		if (!localTest) {
-			((BookStoreHTTPProxy) client).stop();
-			((StockManagerHTTPProxy) storeManager).stop();
-            try {
-                bookStoreHTTPServer.stop();
-            } catch (Exception e) {
-            }
-		}
 	}
 }
 
