@@ -292,8 +292,7 @@ public abstract class BookStoreTest {
 	}
 
 	/**
-	 * Test that we cannot ask for less than one top rated books can be is
-	 * queried for
+	 * Test that we cannot ask for less than one top rated books.
 	 * 
 	 * @throws BookStoreException
 	 */

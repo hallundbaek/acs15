@@ -146,4 +146,13 @@ The architecture achieves strong modularity through deploying a client server mo
 The book-store client and stock-manager client are fully isolated, there is no direct communication between the two. The two clients both affect the state of the book-store and so the may affect the response to request to the book-store, but one crashing will not make the book-store service available to the other. Furthermore clients do not need to consider the effects of concurrent execution when constructing their request. The book-store service is also isolated from the clients if they are deployed on separate machines. That is if the book-store service becomes unavailable or crashes will render requests moot, but will no make the clients unavailable.\\
 We cannot provide the isolation and modularity guarantees when performing local testing as the JVM is a single virtual machine. That is a fatal error in a client or the server will bring down the entire running JVM instance.
 \subsection{Naming service}
+
+\subsection{Exactly-once RPC semantics}
+
+\subsection{Usage of proxy servers}
+
+\subsection{Bottlenecks}
+
+\subsection{Consequences of a server-side crash}
+
 \end{document}

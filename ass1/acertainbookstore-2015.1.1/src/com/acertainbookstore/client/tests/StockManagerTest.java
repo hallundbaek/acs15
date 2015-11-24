@@ -86,6 +86,23 @@ public class StockManagerTest {
 	}
 
 	/**
+	 * Test that if there are no books in demand non are returned
+	 */
+	@Test
+	public void testNoBooksInDemand() {
+		
+	}
+	
+	
+	/**
+	 * Test that only books in demands are return.
+	 */
+	@Test
+	public void testBooksInDemamd() {
+		
+	}
+	
+	/**
 	 * Method to clean up the book store, execute after every test case is run
 	 */
 	@After

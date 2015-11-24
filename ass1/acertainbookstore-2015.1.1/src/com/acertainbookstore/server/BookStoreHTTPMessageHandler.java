@@ -211,6 +211,17 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				response.getWriter().println(listBooksxmlString);
 				break;
 
+			case GETBOOKSINDEMAND:
+				bookStoreResponse = new BookStoreResponse();
+				try {
+					bookStoreResponse.setList(myBookStore.getBooksInDemand());
+				} catch (BookStoreException ex) {
+					bookStoreResponse.setException(ex);
+				}
+				listBooksxmlString = BookStoreUtility.serializeObjectToXMLString(bookStoreResponse);
+				response.getWriter().println(listBooksxmlString);
+				break;
+				
 			case GETSTOCKBOOKSBYISBN:
 				xml = BookStoreUtility.extractPOSTDataFromRequest(request);
 				isbnSet = (Set<Integer>) BookStoreUtility

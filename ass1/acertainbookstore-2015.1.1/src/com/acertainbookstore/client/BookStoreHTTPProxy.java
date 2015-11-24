@@ -142,10 +142,12 @@ public class BookStoreHTTPProxy implements BookStore {
 		BookStoreUtility.SendAndRecv(this.client, exchange);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Book> getTopRatedBooks(int numBooks) throws BookStoreException {
 		ContentExchange exchange = new ContentExchange();
-		String urlString = serverAddress + "/" + BookStoreMessageTag.GETTOPRATEDBOOKS;
+		String urlString = serverAddress + "/"
+				+ BookStoreMessageTag.GETTOPRATEDBOOKS;
 
 		String listNumBooksXMLString = BookStoreUtility
 				.serializeObjectToXMLString(numBooks);
