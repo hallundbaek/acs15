@@ -111,13 +111,12 @@ write(addr, value)
       raise machineTimeoutException
     \end{lstlisting}
   \item
-    READ/WRITE operations against regular main memory is atomic, the operations against our memory abstraction is also atomic. We have achieved that by always waiting on a response from the machines, whether or not the operation went through, or if it failed, meaning it timed out.
+    READ/WRITE operations against regular main memory is atomic within reads and writes to one word, the operations against our memory abstraction will be atomic in the same sense. We have achieved that by always waiting on a response from the machines, whether or not the operation went through, or if it failed, meaning it timed out.
   \item
     In the case that a machine goes down, the data at the given machine would be missing, thus no mapping strategy without redundancy will not be able to retrieve lost data. The memory locations will thus be unavailable, which is what a user could expect from our system, getting an error as opposed to getting the wrong answer is preferable. A new server added that might fill that gap created by a crashing machine, would then be broadcast out in the next request, and the user would be able to address the space again.
 \end{enumerate}
 \section{Techniques for Performance}
 \begin{enumerate}
-
 \item Utilizing concurrency will not influence the latency of unit task a computer system performs, where a unit task is task that has no dependencies on other task the system performs. However, for system tasks that perform several concurrent unit tasks as subtask will have its latency reduced by as some of these will be performed simultaneously. The latency reduction only holds when the overhead of performing unit tasks concurrently is smaller than the gain from concurrent execution.
 \item \paragraph{Dallying} is when a system tasks wait with performing a subtask either to batch the request together with later requests or to completely avoid performing the request. An example of dallying is lazy evalutation of programs, where evalutation of expression are deffered until their needed by other computations.
 \paragraph{Batching} is when a system task performs a subtask on a group on of requests intead of a single request. Batching is often deployed as an optimization for expensive subtasks such as communicating over a network or lookups in an enormous table. An example of batching is when acknowledgements are piggybacked in TCP.
@@ -162,5 +161,5 @@ Yes, it is safe using proxy servers, as the the calls between the server and the
 \subsection{Consequences of a server-side crash}
 web proxies were used in the architecture they would perform RPC calls to the service server. If the server had crashed the the proxies would receive a time-out error from the \textit{SendAndRecv} method call, which the web proxy would forward to the client. This exactly the same behaviour as when client sends request directly to the service server. So the short answer is no.\\
 If used caching on our web proxy, we could use this to mask a server side crash. We would do mask failure on already serviced request by ask the server if there were changes to the response from the request, if this time-outs we assume that the server has faulted and server the client the cached response. Using web caching in to mask failures does introduce complications such as whether the response is a consistent with the state of the server before the failure and since we are using at-most-once RPC semantics whether the failure is in the network.\\
-To use web caching the architecture would need a method for insuring consistency between cached responses and our book-store service responses. 
+To use web caching the architecture would need a method for insuring consistency between cached responses and our book-store service responses.
 \end{document}
