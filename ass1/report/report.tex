@@ -157,7 +157,7 @@ We use at-most-once RPC semantics in the HTTP implementation, this is due to the
 \subsection{Usage of proxy servers}
 Yes, it is safe using proxy servers, as the calls between the server and the business logic is thread-safe.
 \subsection{Bottlenecks}
-
+A bottleneck in regards to the number of clients is in the methods call from the server to the business logic. The methods calls are made thread-safe by using the Java synchronised key word which is an exclusive lock on the books in the store, this means the RPCs from the client are effectively serial. Introducing more clients would mean more request to service, which would aggregate the response time by the latency of each request, as they all access the same object. 
 \subsection{Consequences of a server-side crash}
 web proxies were used in the architecture they would perform RPC calls to the service server. If the server had crashed the proxies would receive a time-out error from the \textit{SendAndRecv} method call, which the web proxy would forward to the client. This exactly the same behaviour as when client sends request directly to the service server. So the short answer is no.\\
 If used caching on our web proxy, we could use this to mask a server side crash. We would do mask failure on already serviced request by ask the server if there were changes to the response from the request, if this time-outs we assume that the server has faulted and server the client the cached response. Using web caching in to mask failures does introduce complications such as whether the response is a consistent with the state of the server before the failure and since we are using at-most-once RPC semantics whether the failure is in the network.\\
