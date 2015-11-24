@@ -24,8 +24,7 @@ public class RPCBookStoreTest extends BookStoreTest {
     try {
       bookStoreHTTPServer = new Thread(new BookStoreHTTPServer());
       bookStoreHTTPServer.start();
-      storeManager = new StockManagerHTTPProxy(
-              "http://localhost:8081/stock");
+      storeManager = new StockManagerHTTPProxy("http://localhost:8081/stock");
       client = new BookStoreHTTPProxy("http://localhost:8081");
       storeManager.removeAllBooks();
     } catch (Exception e) {
@@ -33,6 +32,7 @@ public class RPCBookStoreTest extends BookStoreTest {
     }
   }
 
+  @SuppressWarnings("deprecation")
   @AfterClass
   public static void tearDownAfterClass() throws BookStoreException {
     storeManager.removeAllBooks();
