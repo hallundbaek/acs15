@@ -156,7 +156,7 @@ We cannot provide the isolation and modularity guarantees when performing local 
 \subsection{At-most-once/Exactly-once RPC semantics}
 We use at-most-once RPC semantics in the HTTP implementation, this is due to the fact that we only do requests once, and if they fail we throw an exception immediately, without trying the request again. If we were to try multiple times, we would be using at-least-once semantics. You could argue that we use exactly-once RPC semantics in the local version of the bookstore service, as we know that since everything is within our control. This does not make much sense as local RPC is a bit of an oxymoron.
 \subsection{Usage of proxy servers}
-
+Yes, it is safe using proxy servers, as the the calls between the server and the business logic is threadsafe.
 \subsection{Bottlenecks}
 
 \subsection{Consequences of a server-side crash}
