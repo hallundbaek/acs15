@@ -78,11 +78,11 @@
 \maketitle
 \section{Fundamental Abstractions}
 \begin{enumerate}
-  \item Let us assume that at initialization the administrator of the system knows, how much the system might be scaled up, let us call this $S$, thus the total amount of machines ever scaled to will be at most $SK$. We will then have an array of size $SK$, this will hold communication info necessary for read and write to the individual machines. This array along with its information will reside in the api of the user, giving them direct access to the individual machines. Upon scaling up the new machine will broadcast out to all other machines, which will then update the data-structure at the user upon the next read or write request.\\
+  \item Let us assume that at initialization the administrator of the system knows, how many times the system might be scaled up, let us call this $S$, thus the total amount of machines ever scaled to will be at most $SK$. We will then have an array of size $SK$, this will hold communication info necessary for read and write to the individual machines. This array along with its information will reside in the api of the user, giving them direct access to the individual machines. Upon scaling up the new machine will broadcast out to all other machines, which will then update the data-structure at the user upon the next read or write request.\\
     In the case that a machine goes down, the given request will time out and the user will be notified of the error. As there is no request for redundancy in the abstraction, this way of handling it is acceptable.
     The only centralized component in the design is the data-structure at the individual user. And as explained before, any changes done in the form of adding or removing machines will be relayed back to the user in the next request.
   \item For the API, we will denote $n = \lceil \lg (SK) \rceil$, \texttt{\&} will denote bitwise AND, \texttt{>>} denotes bit-shift and lastly all addresses and $n$ is considered as unsigned integers.\\
-    The read will address find the machines by masking the $n$ first bits of the given address, the object at this array will expose a function \texttt{requestRead(int)} that will send the request and \texttt{response} which will loop until a response is given or timeout is reached. The response can hold a function that needs to be applied to the current array of machines.
+    The read will find the requested machine by masking the $n$ first bits of the given address, the object at this array will expose a function \texttt{requestRead(int)} that will send the read request to the machine and \texttt{response} which will loop until a response is given or timeout is reached. The response can hold a function that needs to be applied to the current array of machines.
     \begin{lstlisting}[language=Ruby, caption={READ}]
 read(addr)
   machine = machines[addr & (n^2 - 1)]
@@ -113,7 +113,7 @@ write(addr, value)
   \item
     READ/WRITE operations against regular main memory is atomic within reads and writes to one word, the operations against our memory abstraction will be atomic in the same sense. We have achieved that by always waiting on a response from the machines, whether or not the operation went through, or if it failed, meaning it timed out.
   \item
-    In the case that a machine goes down, the data at the given machine would be missing, thus no mapping strategy without redundancy will not be able to retrieve lost data. The memory locations will thus be unavailable, which is what a user could expect from our system, getting an error as opposed to getting the wrong answer is preferable. A new server added that might fill that gap created by a crashing machine, would then be broadcast out in the next request, and the user would be able to address the space again.
+    In the case that a machine goes down, the data at the given machine would be lost, no mapping strategy without redundancy will be able to retrieve lost data. The memory locations will thus be unavailable, which is what a user could expect from our system, getting an error as opposed to getting the wrong answer is preferable. A new server added that might fill that gap created by a crashing machine, would then be broadcast out in the next request, and the user would be able to address the space again.
 \end{enumerate}
 \section{Techniques for Performance}
 \begin{enumerate}
