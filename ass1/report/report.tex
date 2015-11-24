@@ -153,8 +153,8 @@ The book-store client and stock-manager client are fully isolated, there is no d
 We cannot provide the isolation and modularity guarantees when performing local testing as the JVM is a single virtual machine. That is a fatal error in a client or the server will bring down the entire running JVM instance.
 \subsection{Naming service}
 
-\subsection{At-most-once RPC semantics}
-
+\subsection{At-most-once/Exactly-once RPC semantics}
+We use at-most-once RPC semantics in the HTTP implementation, this is due to the fact that we only do requests once, and if they fail we throw an exception immediately, without trying the request again. If we were to try multiple times, we would be using at-least-once semantics. You could argue that we use exactly-once RPC semantics in the local version of the bookstore service, as we know that since everything is within our control. This does not make much sense as local RPC is a bit of an oxymoron.
 \subsection{Usage of proxy servers}
 
 \subsection{Bottlenecks}
