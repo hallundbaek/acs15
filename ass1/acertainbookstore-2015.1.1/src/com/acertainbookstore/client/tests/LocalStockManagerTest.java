@@ -1,32 +1,27 @@
 package com.acertainbookstore.client.tests;
 
-import com.acertainbookstore.client.BookStoreHTTPProxy;
-import com.acertainbookstore.client.StockManagerHTTPProxy;
+import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
-import com.acertainbookstore.server.BookStoreHTTPServer;
 import com.acertainbookstore.utils.BookStoreException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-public class HTTPTest extends BookStoreTest {
+public class LocalStockManagerTest extends StockManagerTest {
 
   private static StockManager storeManager;
   private static BookStore client;
-  private static Thread bookStoreHTTPServer;
 
-  public HTTPTest() {
+  public LocalStockManagerTest() {
     super(client, storeManager);
   }
 
   @BeforeClass
   public static void setUpBeforeClass() {
+    CertainBookStore store = new CertainBookStore();
+    storeManager = store;
+    client = store;
     try {
-      bookStoreHTTPServer = new Thread(new BookStoreHTTPServer());
-      bookStoreHTTPServer.start();
-      storeManager = new StockManagerHTTPProxy(
-              "http://localhost:8081/stock");
-      client = new BookStoreHTTPProxy("http://localhost:8081");
       storeManager.removeAllBooks();
     } catch (Exception e) {
       e.printStackTrace();
@@ -36,8 +31,5 @@ public class HTTPTest extends BookStoreTest {
   @AfterClass
   public static void tearDownAfterClass() throws BookStoreException {
     storeManager.removeAllBooks();
-    ((BookStoreHTTPProxy) client).stop();
-    ((StockManagerHTTPProxy) storeManager).stop();
-    bookStoreHTTPServer.stop();
   }
 }

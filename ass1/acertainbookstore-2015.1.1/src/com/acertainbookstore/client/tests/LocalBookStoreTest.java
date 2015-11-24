@@ -7,12 +7,12 @@ import com.acertainbookstore.utils.BookStoreException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-public class LocalTest extends BookStoreTest {
+public class LocalBookStoreTest extends BookStoreTest {
 
   private static StockManager storeManager;
   private static BookStore client;
 
-  public LocalTest() {
+  public LocalBookStoreTest() {
     super(client, storeManager);
   }
 

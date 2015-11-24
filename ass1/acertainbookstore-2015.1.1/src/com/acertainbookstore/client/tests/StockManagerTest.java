@@ -30,41 +30,21 @@ import com.acertainbookstore.utils.BookStoreException;
  * Test class to test the StockManager interface
  * 
  */
-public class StockManagerTest {
+public abstract class StockManagerTest {
 
 	private static final Integer TEST_ISBN = 30345650;
 	private static final Integer NUM_COPIES = 5;
 
 	private static boolean localTest = true;
-	private static StockManager storeManager;
-	private static BookStore client;
+	private StockManager storeManager;
+	private BookStore client;
 
-	/**
-	 * Initializes new instance
-	 * 
-	 * 
-	 */
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		try {
-			String localTestProperty = System
-					.getProperty(BookStoreConstants.PROPERTY_KEY_LOCAL_TEST);
-			localTest = (localTestProperty != null) ? Boolean
-					.parseBoolean(localTestProperty) : localTest;
-			if (localTest) {
-				CertainBookStore store = new CertainBookStore();
-				storeManager = store;
-				client = store;
-			} else {
-				storeManager = new StockManagerHTTPProxy(
-						"http://localhost:8081/stock");
-				client = new BookStoreHTTPProxy("http://localhost:8081");
-			}
-			storeManager.removeAllBooks();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	
+	protected StockManagerTest(BookStore client, StockManager storeManager) {
+		this.storeManager = storeManager;
+		this.client = client;
 	}
+	
 
 	/**
 	 * Helper method to get the default book used by initializeBooks
@@ -455,12 +435,4 @@ public class StockManagerTest {
 		assertTrue(booksInStoreList.size() == 0);
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws BookStoreException {
-		storeManager.removeAllBooks();
-		if (!localTest) {
-			((BookStoreHTTPProxy) client).stop();
-			((StockManagerHTTPProxy) storeManager).stop();
-		}
-	}
 }

@@ -31,8 +31,8 @@ public abstract class BookStoreTest {
 	private static final int TEST_ISBN = 3044560;
 	private static final int TEST_ISBN_2 = 305000;
 	private static final int NUM_COPIES = 5;
-	private static StockManager storeManager;
-	private static BookStore client;
+	private StockManager storeManager;
+	private BookStore client;
 
   protected BookStoreTest(BookStore client, StockManager storeManager) {
     this.client = client;
