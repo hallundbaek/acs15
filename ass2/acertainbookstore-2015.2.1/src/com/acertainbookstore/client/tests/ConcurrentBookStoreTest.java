@@ -3,6 +3,8 @@ package com.acertainbookstore.client.tests;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -146,14 +148,49 @@ public class ConcurrentBookStoreTest {
   }
 
   /**
-   * Test that if A writes to 1 and 2 and B writes to 1 and 2 then either we end
-   * in state A A or B B not A B or B A
+   * Test that a thread is allowed to complete.
+   * @throws BookStoreException 
    */
   @Test
-  public void testSerilizability() {
+  public void testSerilizability() throws BookStoreException {
+    List<Thread> ts = new ArrayList<Thread>();
+    Set<BookCopy> buyThreeBooks = new HashSet<>();
+    buyThreeBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES-2));
+    Set<BookCopy> buyFourBooks = new HashSet<>();
+    buyFourBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES-1));
+    Set<BookCopy> buyAllBooks = new HashSet<>();
+    buyAllBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES));
     
+    Thread buyThree = new TestBuyer(buyThreeBooks);
+    ts.add(buyThree);
+    Thread buyFour = new TestBuyer(buyFourBooks);
+    ts.add(buyFour);
+    Thread buyAll = new TestBuyer(buyAllBooks);
+    ts.add(buyAll);
+    
+    Collections.shuffle(ts);
+    
+    for(Thread t : ts) {
+      t.start();
+    }
+    
+    for(Thread t: ts) {
+      try {
+        t.join();
+      } catch (InterruptedException e) {
+
+      }
+    }
+        
+    List<StockBook> booksInStorePostTest = storeManager.getBooks();
+    StockBook book = booksInStorePostTest.get(0);
+    assertTrue(book.getNumCopies() == 0 || book.getNumCopies() == 1 || book.getNumCopies() == 2);
   }
 
+  /**
+   * Test 
+   */
+  
   protected class Test1BookClient extends Thread {
     volatile int reps;
     volatile Set<BookCopy> booksToBuy;
@@ -250,11 +287,21 @@ public class ConcurrentBookStoreTest {
     }
   }
 
-  protected class Test1Buyer extends Thread {
-
+  protected class TestBuyer extends Thread {
+    Set<BookCopy> booksToBuy;
+    
+    public TestBuyer(Set<BookCopy> booksToBuy) {
+      this.booksToBuy = booksToBuy;
+    }
+    
+    public void run() {
+      try {
+        client.buyBooks(booksToBuy);
+      } catch (BookStoreException e) {
+        Thread.currentThread().interrupt();
+      }
+      return;
+    }
   }
 
-  protected class Test2Buyer extends Thread {
-
-  }
 }
