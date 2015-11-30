@@ -17,7 +17,6 @@ import org.junit.Test;
 
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
-import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.business.ConcurrentCertainBookStore;
 import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.business.ImmutableStockBook;
