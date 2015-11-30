@@ -21,11 +21,8 @@ import com.acertainbookstore.business.ConcurrentCertainBookStore;
 import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.business.ImmutableStockBook;
 import com.acertainbookstore.business.StockBook;
-import com.acertainbookstore.client.BookStoreHTTPProxy;
-import com.acertainbookstore.client.StockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
-import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
 
 public class ConcurrentBookStoreTest {
@@ -198,7 +195,7 @@ public class ConcurrentBookStoreTest {
 
     public Test1BookClient(int reps, Set<BookCopy> booksToBuy) {
       this.reps = reps;
-      this.booksToBuy = this.booksToBuy;
+      this.booksToBuy = booksToBuy;
     }
 
     public void run() {
@@ -208,6 +205,7 @@ public class ConcurrentBookStoreTest {
           client.buyBooks(booksToBuy);
           r -= 1;
         } catch (BookStoreException e) {
+          Thread.currentThread().interrupt();
         }
       }
     }
