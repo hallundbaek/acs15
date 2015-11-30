@@ -371,7 +371,7 @@ public class ConcurrentCertainBookStore implements BookStore, StockManager {
 	}
 
   public void lockISBNSet(Set<Integer> isbnSet, Boolean isWrite) {
-    Integer[] isbnList = (Integer[]) isbnSet.toArray();
+    Integer[] isbnList = isbnSet.toArray(new Integer[isbnSet.size()]);
     Arrays.sort(isbnList);
     if (isWrite) {
       for (Integer isbn : isbnList) {
@@ -385,7 +385,7 @@ public class ConcurrentCertainBookStore implements BookStore, StockManager {
   }
 
   public void unlockISBNSet(Set<Integer> isbnSet, Boolean isWrite) {
-    Integer[] isbnList = (Integer[]) isbnSet.toArray();
+    Integer[] isbnList = isbnSet.toArray(new Integer[isbnSet.size()]);
     Arrays.sort(isbnList);
     if (isWrite) {
       for (Integer isbn : isbnList) {
