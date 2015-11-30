@@ -31,7 +31,7 @@ public class ConcurrentBookStoreTest {
   private static StockManager storeManager;
   private static final int TEST_ISBN = 123456;
   private static final int NUM_COPIES = 5;
-  private static final int numReps = 10;
+  private static final int NUM_REPS = 10;
 
   @BeforeClass
   public static void setUpBeforeClass() {
@@ -93,8 +93,8 @@ public class ConcurrentBookStoreTest {
     Set<BookCopy> booksToBuy = new HashSet<>();
     booksToBuy.add(new BookCopy(TEST_ISBN, NUM_COPIES));
 
-    Thread c1 = new Thread(new Test1BookClient(numReps, booksToBuy));
-    Thread c2 = new Thread(new Test1StockClient(numReps, booksToBuy));
+    Thread c1 = new Thread(new Test1BookClient(NUM_REPS, booksToBuy));
+    Thread c2 = new Thread(new Test1StockClient(NUM_REPS, booksToBuy));
 
     c1.start();
     c2.start();
@@ -117,9 +117,30 @@ public class ConcurrentBookStoreTest {
 
   /**
    * Consistency of concurrent calls of book-store service
+   * 
+   * @throws BookStoreException
    */
   @Test
-  public void testConsistency() {
+  public void testConsistency() throws BookStoreException {
+    List<StockBook> stockedSnap = storeManager.getBooks();
+    Set<BookCopy> booksToBuy = new HashSet<>();
+    booksToBuy.add(new BookCopy(TEST_ISBN, NUM_COPIES));
+    client.buyBooks(booksToBuy);
+    List<StockBook> boughtSnap = storeManager.getBooks();
+    initializeBooks();
+    Thread mutator = new Test2Mutator(NUM_REPS, booksToBuy);
+    Thread checker = new Test2Checker(boughtSnap, stockedSnap);
+    checker.start();
+    mutator.start();
+    try {
+      mutator.join();
+    } catch (InterruptedException e) {
+      fail();
+    }
+    if (Thread.interrupted())
+      fail();
+    else
+      checker.interrupt();
   }
 
   protected class Test1BookClient extends Thread {
@@ -189,7 +210,7 @@ public class ConcurrentBookStoreTest {
     }
   }
 
-  protected class Test2Checker implements Runnable {
+  protected class Test2Checker extends Thread {
     volatile List<StockBook> boughtSnap;
     volatile List<StockBook> stockedSnap;
 
@@ -207,7 +228,10 @@ public class ConcurrentBookStoreTest {
 
         }
         if (snap != null) {
-          assertTrue(snap.equals(boughtSnap) || snap.equals(stockedSnap));
+          if (!snap.equals(boughtSnap) && !snap.equals(stockedSnap)) {
+            Thread.currentThread().interrupt();
+          }
+          ;
         }
       }
     }
