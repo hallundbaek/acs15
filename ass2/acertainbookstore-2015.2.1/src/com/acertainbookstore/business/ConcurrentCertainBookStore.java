@@ -169,25 +169,28 @@ public class ConcurrentCertainBookStore implements BookStore, StockManager {
 		// Check that all ISBNs that we buy are there first.
 		int ISBN;
 		BookStoreBook book;
-    Lock lock;
 		Boolean saleMiss = false;
+    readLock.lock();
 		for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
       ISBN = bookCopyToBuy.getISBN();
-      if (bookCopyToBuy.getNumCopies() < 0)
+      if (bookCopyToBuy.getNumCopies() < 0) {
+        readLock.unlock();
         throw new BookStoreException(BookStoreConstants.NUM_COPIES
                 + bookCopyToBuy.getNumCopies()
                 + BookStoreConstants.INVALID);
-      if (BookStoreUtility.isInvalidISBN(ISBN))
+      }
+      if (BookStoreUtility.isInvalidISBN(ISBN)) {
+        readLock.unlock();
         throw new BookStoreException(BookStoreConstants.ISBN + ISBN
                 + BookStoreConstants.INVALID);
-      readLock.lock();
+      }
       if (!bookMap.containsKey(ISBN)) {
         readLock.unlock();
         throw new BookStoreException(BookStoreConstants.ISBN + ISBN
                 + BookStoreConstants.NOT_AVAILABLE);
       }
-      readLock.unlock();
     }
+    readLock.unlock();
 
     Set<Integer> isbnSet = new HashSet<>();
     for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
