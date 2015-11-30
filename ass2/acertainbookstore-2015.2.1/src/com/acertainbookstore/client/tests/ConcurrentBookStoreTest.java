@@ -143,6 +143,16 @@ public class ConcurrentBookStoreTest {
       checker.interrupt();
   }
 
+  /**
+   * Test that if A writes to 1 and 2 and B writes to 1 and 2 then either we end in state A A or B B not A B or B A 
+   * @author focus
+   *
+   */
+  @Test
+  public void testSerilizability() {
+    
+  }
+  
   protected class Test1BookClient extends Thread {
     volatile int reps;
     volatile Set<BookCopy> booksToBuy;
