@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
+import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.business.ConcurrentCertainBookStore;
 import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.business.ImmutableStockBook;
@@ -31,7 +32,7 @@ public class ConcurrentBookStoreTest {
   private static StockManager storeManager;
   private static final int TEST_ISBN = 123456;
   private static final int NUM_COPIES = 5;
-  private static final int NUM_REPS = 10;
+  private static final int NUM_REPS = 100;
 
   @BeforeClass
   public static void setUpBeforeClass() {
@@ -125,8 +126,10 @@ public class ConcurrentBookStoreTest {
     List<StockBook> stockedSnap = storeManager.getBooks();
     Set<BookCopy> booksToBuy = new HashSet<>();
     booksToBuy.add(new BookCopy(TEST_ISBN, NUM_COPIES));
+    
     client.buyBooks(booksToBuy);
     List<StockBook> boughtSnap = storeManager.getBooks();
+    storeManager.removeAllBooks();
     initializeBooks();
     Thread mutator = new Test2Mutator(NUM_REPS, booksToBuy);
     Thread checker = new Test2Checker(boughtSnap, stockedSnap);
@@ -144,15 +147,17 @@ public class ConcurrentBookStoreTest {
   }
 
   /**
-   * Test that if A writes to 1 and 2 and B writes to 1 and 2 then either we end in state A A or B B not A B or B A 
+   * Test that if A writes to 1 and 2 and B writes to 1 and 2 then either we end
+   * in state A A or B B not A B or B A
+   * 
    * @author focus
-   *
+   * 
    */
   @Test
   public void testSerilizability() {
     
   }
-  
+
   protected class Test1BookClient extends Thread {
     volatile int reps;
     volatile Set<BookCopy> booksToBuy;
@@ -170,6 +175,7 @@ public class ConcurrentBookStoreTest {
           r -= 1;
         } catch (BookStoreException e) {
         }
+        return;
       }
     }
   }
@@ -191,6 +197,7 @@ public class ConcurrentBookStoreTest {
           r -= 1;
         } catch (BookStoreException e) {
         }
+        return;
       }
     }
   }
@@ -245,5 +252,13 @@ public class ConcurrentBookStoreTest {
         }
       }
     }
+  }
+
+  protected class Test1Buyer extends Thread {
+
+  }
+
+  protected class Test2Buyer extends Thread {
+
   }
 }
