@@ -172,42 +172,45 @@ public class ConcurrentCertainBookStore implements BookStore, StockManager {
     Lock lock;
 		Boolean saleMiss = false;
 		for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
-			ISBN = bookCopyToBuy.getISBN();
-			if (bookCopyToBuy.getNumCopies() < 0)
-				throw new BookStoreException(BookStoreConstants.NUM_COPIES
-						+ bookCopyToBuy.getNumCopies()
-						+ BookStoreConstants.INVALID);
-			if (BookStoreUtility.isInvalidISBN(ISBN))
-				throw new BookStoreException(BookStoreConstants.ISBN + ISBN
-						+ BookStoreConstants.INVALID);
+      ISBN = bookCopyToBuy.getISBN();
+      if (bookCopyToBuy.getNumCopies() < 0)
+        throw new BookStoreException(BookStoreConstants.NUM_COPIES
+                + bookCopyToBuy.getNumCopies()
+                + BookStoreConstants.INVALID);
+      if (BookStoreUtility.isInvalidISBN(ISBN))
+        throw new BookStoreException(BookStoreConstants.ISBN + ISBN
+                + BookStoreConstants.INVALID);
       readLock.lock();
-			if (!bookMap.containsKey(ISBN))
-				throw new BookStoreException(BookStoreConstants.ISBN + ISBN
-						+ BookStoreConstants.NOT_AVAILABLE);
+      if (!bookMap.containsKey(ISBN)) {
+        readLock.unlock();
+        throw new BookStoreException(BookStoreConstants.ISBN + ISBN
+                + BookStoreConstants.NOT_AVAILABLE);
+      }
       readLock.unlock();
-      lock = lockMap.get(ISBN).writeLock();
-      lock.lock();
-			book = bookMap.get(ISBN);
-			if (!book.areCopiesInStore(bookCopyToBuy.getNumCopies())) {
-				book.addSaleMiss(); // If we cannot sell the copies of the book
-									// its a miss
-				saleMiss = true;
-			}
-      lock.unlock();
-		}
+    }
 
-		// We throw exception now since we want to see how many books in the
-		// order incurred misses which is used by books in demand
-		if (saleMiss)
-			throw new BookStoreException(BookStoreConstants.BOOK
-					+ BookStoreConstants.NOT_AVAILABLE);
-
-		// Then make purchase
     Set<Integer> isbnSet = new HashSet<>();
     for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
       isbnSet.add(bookCopyToBuy.getISBN());
     }
     lockISBNSet(isbnSet, true);
+    for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
+			book = bookMap.get(bookCopyToBuy.getISBN());
+			if (!book.areCopiesInStore(bookCopyToBuy.getNumCopies())) {
+				book.addSaleMiss(); // If we cannot sell the copies of the book
+									// its a miss
+				saleMiss = true;
+			}
+		}
+
+		// We throw exception now since we want to see how many books in the
+		// order incurred misses which is used by books in demand
+		if (saleMiss) {
+      unlockISBNSet(isbnSet, true);
+      throw new BookStoreException(BookStoreConstants.BOOK
+              + BookStoreConstants.NOT_AVAILABLE);
+    }
+		// Then make purchase
 		for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
 			book = bookMap.get(bookCopyToBuy.getISBN());
 			book.buyCopies(bookCopyToBuy.getNumCopies());
