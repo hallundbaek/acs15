@@ -1,0 +1,197 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{lastpage}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{textcomp}
+\usetikzlibrary{patterns}
+\usepackage{pdfpages}
+\usepackage{gauss}
+\usepackage{fancyvrb}
+\usepackage[table]{colortbl}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage[margin=2.5 cm]{geometry}
+
+\delimitershortfall-1sp
+\newcommand\abs[1]{\left|#1\right|}
+
+\definecolor{listinggray}{gray}{0.9}
+\usepackage{listings}
+\lstset{
+	language=,
+	literate=
+		{æ}{{\ae}}1
+		{ø}{{\o}}1
+		{å}{{\aa}}1
+		{Æ}{{\AE}}1
+		{Ø}{{\O}}1
+		{Å}{{\AA}}1,
+	backgroundcolor=\color{listinggray},
+	tabsize=2,
+	rulecolor=,
+	basicstyle=\scriptsize,
+	upquote=true,
+	aboveskip={0.2\baselineskip},
+	columns=fixed,
+	showstringspaces=false,
+	extendedchars=true,
+	breaklines=true,
+	prebreak =\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	frame=single,
+	showtabs=false,
+	showspaces=false,
+	showlines=true,
+	showstringspaces=false,
+	identifierstyle=\ttfamily,
+	keywordstyle=\color[rgb]{0,0,1},
+	commentstyle=\color[rgb]{0.133,0.545,0.133},
+	stringstyle=\color[rgb]{0.627,0.126,0.941},
+  moredelim=**[is][\color{blue}]{@}{@},
+}
+\newcommand{\comment}[1]{%
+  \text{\phantom{(#1)}} \tag{#1}}
+\lstdefinestyle{base}{
+  emptylines=1,
+  breaklines=true,
+  basicstyle=\ttfamily\color{black},
+}
+
+\usepackage{tikz}
+\tikzset{main node/.style={circle,fill=white!20,draw,minimum size=1cm,inner sep=0pt},}
+
+
+\pagestyle{fancy}
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\newcommand*\squared[1]{%
+  \tikz[baseline=(R.base)]\node[draw,rectangle,inner sep=0.5pt](R) {#1};\!}
+\cfoot{Page \thepage\ of \pageref{LastPage}}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\author{Ola Rønning (vdl761) \\ Tobias Hallundbæk Petersen (xtv657)}
+\title{Advanced Computer Systems \\ Assignment 2}
+\lhead{Advanced Computer Systems}
+\rhead{Assignment 2}
+
+\begin{document}
+\maketitle
+\section{Serializability \& Locking}
+
+\subsection*{Schedule 1}
+\begin{figure}[h!]
+\texttt{T1: R(X)\hspace{250pt}W(Y) C\\
+T2:\hspace{50pt}W(Z) W(X) C \\
+T3:\hspace{150pt}R(Z) R(Y) C}
+\caption{Schedule one.}
+\label{sch1}
+\end{figure}
+Schedule one, reproduced above, corresponds to the precedence graph in figure~\ref{p1}.
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+    \node[main node] (1) at (0,1)      {$T1$};
+    \node[main node] (2) at (-1, -1) {$T2$};
+    \node[main node] (3) at (1, -1)  {$T3$};
+
+    \path[draw,thick,->]
+    (1) edge node {} (2)
+    (2) edge node {} (3)
+    (3) edge node {} (1);
+\end{tikzpicture}
+\caption{Precedence graph for Schedule one, see figure~\ref{sch1}.}
+\label{p1}
+\end{figure}
+The precedence graph, see Figure~\ref{p1}, contains a cycle between transactions: \texttt{T1,T2,T3} and the schedule is thererfore not conflict serializable. As schedulers using Strict two phase locking allows only conflict serializable schedules. Schedule one cannot have been produced by a scheduler following Strict two phase locking.
+\subsection*{Schedule 2}
+\begin{figure}[h!]
+\texttt{T1: R(X)\hspace{150pt}W(Y) C\\
+T2:\hspace{130pt}R(Z)\hspace{120pt}W(X) W(Y) C\\
+T3:\hspace{50pt}W(Z) C}
+\caption{Schedule two.}
+\label{sch2}
+\end{figure}
+Schedule two, reproduced above, corresponds to the precedence graph in figure~\ref{p2}.
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+    \node[main node] (2) at (0,1)    {$T2$};
+    \node[main node] (1) at (-1, -1) {$T1$};
+    \node[main node] (3) at (1, -1)  {$T3$};
+
+    \path[draw,thick,->]
+    (1) edge node {} (2)
+    (3) edge node {} (2);
+\end{tikzpicture}
+\caption{Precedence graph for Schedule one, see figure~\ref{sch2}.}
+\label{p2}
+\end{figure}
+The precedence graph, see Figure~\ref{p2}, is acyclic, so Schedule two is conflict serializable. In particular, schedule two is equivalent with a serial schedule where transaction two is performed last. As schedule two is conflict serializable, schedule two could be scheduled by a scheduler following Strict two phase locking. The injection of shared and exclusive locks, required if the scheduler was using Strict two phase locking, is reproduced below in figure \ref{locks}.
+\begin{figure}[h!]
+\texttt{T1: S(X)\hspace{95pt}E(Y)RS(X)RE(Y)\\
+T2:\hspace{105pt}S(Z)\hspace{90pt}E(X)E(Y)RS(Z)RE(X)RE(Y)\\
+T3:\hspace{50pt}E(Z)RE(Z)}
+\caption{Shared and exclusive locks that need to be acquired in order for schedule two, see figure~\ref{sch2}, to be scheduled using Strict two phase locking. \texttt{S(Q)} acquires a shared lock on \texttt{Q} and \texttt{RS(Q)} releases the lock on \texttt{Q}, exclusive locks follow the same semantics, only with an \texttt{E}.}
+\label{locks}
+\end{figure}
+
+\section{Optimisitc Concurrency Control}
+
+\subsection*{Scenario 1}
+\begin{figure}[h!]
+\texttt{T1: RS(T1) = \{1, 2, 3\}, WS(T1) = \{3\},\\
+T1 completes before T3 starts.\\
+T2: RS(T2) = \{2, 3, 4\}, WS(T2) = \{4, 5\},\\
+T2 completes before T3 begins with its write phase.\\
+T3: RS(T3) = \{3, 4, 6\}, WS(T3) = \{3\},\\
+allow commit or rollback?}
+\caption{Scenario one.}
+\label{sc1}
+\end{figure}
+In scenario one, see Figure~\ref{sc1}, we will have to roll-back. As both the write-set of transaction two and the read-set of transaction three contain object \texttt{4}. The conflict occurs because transaction two completes before transactions threes begins its write phase.
+\begin{align}
+WS(T2) \cap RS(T3) &= \{4, 5\} \cap \{3, 4, 5\}\\
+&= \{4\} \neq \emptyset
+\end{align}
+\subsection*{Scenario 2}
+\begin{figure}[h!]
+\texttt{T1: RS(T1) = \{2, 3, 4, 5\}, WS(T1) = \{4\},\\
+T1 completes before T3 begins with its write phase.\\
+T2: RS(T2) = \{6, 7, 8\}, WS(T2) = \{6\},\\
+T2 completes read phase before T3 does.\\
+T3: RS(T3) = \{2, 3, 5, 7, 8\}, WS(T3) = \{7, 8\},\\
+allow commit or rollback?}
+\caption{Scenario two.}
+\label{sc2}
+\end{figure}
+In scenario two, see Figure~\ref{sc2}, we will also have to roll-back. As both the write-set of transaction one and the read-set of transaction three contain object \texttt{3}. The conflict occurs because transaction one completes before transaction three begins its write phase.
+\begin{align}
+WS(T1) \cap RS(T3) &= \{3\} \cap \{3, 4, 5, 6, 7\}\\
+&= \{3\} \neq \emptyset
+\end{align}
+\subsection*{Scenario 3}
+\begin{figure}[h!]
+\texttt{T1: RS(T1) = \{2, 3, 4, 5\}, WS(T1) = \{4\},\\
+T1 completes before T3 begins with its write phase.\\
+T2: RS(T2) = \{6, 7, 8\}, WS(T2) = \{6\},\\
+T2 completes before T3 begins with its write phase.\\
+T3: RS(T3) = \{2, 3, 5, 7, 8\}, WS(T3) = \{7, 8\},\\
+allow commit or rollback?}
+\caption{Scenario three.}
+\label{sc3}
+\end{figure}
+In scenario three, see figure~\ref{sc3}, transaction three can commit as there are no offending objects.
+\begin{align}
+WS(T1) \cap RS(T3) &= \{4\} \cap \{2, 3, 5, 7, 8\}\\
+&= \emptyset\\
+WS(T2) \cap RS(T3) &= \{6\} \cap \{2, 3, 5, 7, 8\}\\
+&= \emptyset
+\end{align}
+
+\section{Dicussion on the Concurrent Implementation}
+
+\end{document}
