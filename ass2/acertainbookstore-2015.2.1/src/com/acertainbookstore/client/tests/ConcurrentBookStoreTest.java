@@ -126,7 +126,6 @@ public class ConcurrentBookStoreTest {
     List<StockBook> stockedSnap = storeManager.getBooks();
     Set<BookCopy> booksToBuy = new HashSet<>();
     booksToBuy.add(new BookCopy(TEST_ISBN, NUM_COPIES));
-    
     client.buyBooks(booksToBuy);
     List<StockBook> boughtSnap = storeManager.getBooks();
     storeManager.removeAllBooks();
@@ -149,9 +148,6 @@ public class ConcurrentBookStoreTest {
   /**
    * Test that if A writes to 1 and 2 and B writes to 1 and 2 then either we end
    * in state A A or B B not A B or B A
-   * 
-   * @author focus
-   * 
    */
   @Test
   public void testSerilizability() {
