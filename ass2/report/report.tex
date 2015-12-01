@@ -192,6 +192,19 @@ WS(T2) \cap RS(T3) &= \{6\} \cap \{2, 3, 5, 7, 8\}\\
 &= \emptyset
 \end{align}
 
-\section{Dicussion on the Concurrent Implementation}
-
+\section{Discussion on the Concurrent Implementation}
+\begin{enumerate}
+  \item For the implementation we have used two types of locking, one for the entire bookmap, and one for each individual book in the bookmap, whenever a subset of books are to be written or read from, their locks are taken in order of their ISBN. The lock for the entire bookmap, is only used in cases such as adding, removing or checking if something is contained in it. This results in a strict conservative two-phase locking scheme.
+    \begin{enumerate}
+      \item By ensuring that no reads or writes to a set of books are done unless all locks for the given books are held. This way an operation can only read when others read but not write, ensuring that no reads result in a wrong value. Likewise writes are only able to be executed if all locks for the books to write to are held.
+      \item %TODO
+    \end{enumerate}
+  \item As the locking is partitioned, we have two different locking schemes. To argue the locking scheme for the entire bookmap is correct, we need to look at the functionality. There are three different operations that can be done on the bookmap: adding, removing, looking up. The first two being writes, and the last being a read. Whenever adding one or more books, the write lock is taken, the locks for the new books are initialized, the new books are added, and the write lock is given up. This way no books can be removed, no books can be looked up and no books can be added, resulting in a correct bookmap after the operation.\\
+Whenever removing one or more books, the write lock is taken, the locks for the books to be removed are taken, the books are removed.And lastly the locks for the books are removed unlocked, and removed from the lockmap. At this point the thread that might be waiting for one of the removed books will crash as the book is not to be found anymore. This behaviour is desired as it is the cleanest way to stop threads waiting to operate on to be removed books.\\
+When looking up whether or not a book exists in the bookmap, the bookmap read lock is taken, this ensures that the book is not removed when looking it up, and that it is not added after looking it up.\\
+The other locking scheme which is on book by book level, we use strict conservative two-phase locking, which if implemented correct is correct.
+  \item Yes, in the case where a thread dies unexpectedly, and its lock is not given up. In all other cases, no two threads can wait for each other. On the book by book level, strict conservative two-phase locking is implemented, which will not result in deadlocking, on the bookmap level, as there is only one lock for read and one for write, no deadlocking can occur. The only place you could think deadlocking could occur would be when the two locking schemes waited for each other. The only operation that uses both locking schemes at the same time is when removing a book, which implies that there will result in no deadlocking.
+  \item The only issue with scalability is that the add and remove operation become more and more expensive, as no other operations can lookup whether or not a book exists when these are done. When scaling up the system we can assume that more of both will be requested and as they become more expensive it is a bottleneck.
+  \item We incur an overhead that is of size $O(\lg{n})$ when doing an operation on one or more books, as ISBN's needs to be sorted and locked. A harder to measure overhead happens when taking the write lock on the entire bookmap, this will increase all concurrent requests with the time of the write. This overhead is not that bad for the concurrency we get, assuming that adding new books and removing old books are relatively rare operations.
+\end{enumerate}
 \end{document}
