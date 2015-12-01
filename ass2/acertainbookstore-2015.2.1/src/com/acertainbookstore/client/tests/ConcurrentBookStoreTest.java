@@ -33,7 +33,7 @@ public class ConcurrentBookStoreTest {
   private static StockManager storeManager;
   private static final int TEST_ISBN = 123456;
   private static final int NUM_COPIES = 5;
-  private static final int NUM_REPS = 1000;
+  private static final int NUM_REPS = 100;
 
   @BeforeClass
   public static void setUpBeforeClass() {
@@ -177,7 +177,7 @@ public class ConcurrentBookStoreTest {
       try {
         t.join();
       } catch (InterruptedException e) {
-
+        fail();
       }
     }
         
@@ -189,7 +189,10 @@ public class ConcurrentBookStoreTest {
   /**
    *
    */
-  
+  @Test
+  public void test() {
+    
+  }
   
   
   protected class Test1BookClient extends Thread {
@@ -203,13 +206,15 @@ public class ConcurrentBookStoreTest {
 
     public void run() {
       int r = this.reps;
-      while (r >= 0) {
+      while (r > 0) {
         try {
           client.buyBooks(booksToBuy);
           r -= 1;
         } catch (BookStoreException e) {
+          Thread.currentThread().interrupt();
         }
       }
+      return;
     }
   }
 
@@ -224,7 +229,7 @@ public class ConcurrentBookStoreTest {
 
     public void run() {
       int r = this.reps;
-      while (r >= 0) {
+      while (r > 0) {
         try {
           storeManager.addCopies(booksToAdd);
           r -= 1;
@@ -232,6 +237,7 @@ public class ConcurrentBookStoreTest {
           Thread.currentThread().interrupt();
         }
       }
+      return;
     }
   }
 
