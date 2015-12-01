@@ -57,6 +57,14 @@ public class ConcurrentBookStoreTest {
         "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0, false);
   }
 
+  public Set<StockBook> addManyBooks() {
+    Set<StockBook> bs = new HashSet<>();
+    for(int i = 1; i < 100; i++) {
+    bs.add(new ImmutableStockBook(TEST_ISBN+i, "Harry Potter and JUnit",
+        "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0, false));
+    }
+    return bs;
+  }
   public Book getDefaultBook() {
     return new ImmutableBook(TEST_ISBN, "Harry Potter and JUnit", "JK Unit",
         NUM_COPIES);
@@ -137,61 +145,119 @@ public class ConcurrentBookStoreTest {
     } catch (InterruptedException e) {
       fail();
     }
-    if (Thread.interrupted())
+    if (checker.isInterrupted())
       fail();
     else
       checker.interrupt();
+    try {
+      checker.join();
+    } catch (InterruptedException e) {
+
+    }
   }
 
   /**
    * Test that a thread is allowed to complete.
-   * @throws BookStoreException 
+   * 
+   * @throws BookStoreException
+   * @throws InterruptedException
    */
   @Test
-  public void testSerilizability() throws BookStoreException {
+  public void testSerilizability() throws BookStoreException,
+      InterruptedException {
     List<Thread> ts = new ArrayList<Thread>();
     Set<BookCopy> buyThreeBooks = new HashSet<>();
-    buyThreeBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES-2));
+    buyThreeBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES - 2));
     Set<BookCopy> buyFourBooks = new HashSet<>();
-    buyFourBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES-1));
+    buyFourBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES - 1));
     Set<BookCopy> buyAllBooks = new HashSet<>();
     buyAllBooks.add(new BookCopy(TEST_ISBN, NUM_COPIES));
-    
+
     Thread buyThree = new TestBuyer(buyThreeBooks);
     ts.add(buyThree);
     Thread buyFour = new TestBuyer(buyFourBooks);
     ts.add(buyFour);
     Thread buyAll = new TestBuyer(buyAllBooks);
     ts.add(buyAll);
-    
+
     Collections.shuffle(ts);
 
-    for(Thread t : ts) {
+    for (Thread t : ts) {
       t.start();
     }
-    
-    for(Thread t: ts) {
+
+    for (Thread t : ts) {
       try {
         t.join();
       } catch (InterruptedException e) {
         fail();
       }
+      Thread.currentThread().sleep(100);
+      List<StockBook> booksInStorePostTest = storeManager.getBooks();
+      StockBook book = booksInStorePostTest.get(0);
+      assertTrue((book.getNumCopies() == 0 && buyThree.isInterrupted() && buyFour
+          .isInterrupted())
+          || (book.getNumCopies() == 1 && buyAll.isInterrupted() && buyThree
+              .isInterrupted())
+          || (book.getNumCopies() == 2 && buyAll.isInterrupted() && buyFour
+              .isInterrupted()));
+
     }
-        
-    List<StockBook> booksInStorePostTest = storeManager.getBooks();
-    StockBook book = booksInStorePostTest.get(0);
-    assertTrue(book.getNumCopies() == 0 || book.getNumCopies() == 1 || book.getNumCopies() == 2);
   }
 
   /**
-   *
+   * Test that deadlock cannot occur by starting a many threads that all
+   * interact with the same book
+   * 
+   * @throws BookStoreException
    */
   @Test
-  public void test() {
-    
+  public void testNoDeadLocks() throws BookStoreException {
+    Thread[] tbs = new Thread[NUM_REPS];
+    Thread[] tgs = new Thread[NUM_REPS];
+    Thread[] trss = new Thread[NUM_REPS];
+    storeManager.addBooks(addManyBooks());
+    Set<BookCopy> booksToBuy = new HashSet<>();
+    Set<Integer> isbns = new HashSet<>();
+    for(int i = 0; i < 100; i ++) {
+    booksToBuy.add(new BookCopy(TEST_ISBN+i, NUM_COPIES));
+    isbns.add(getDefaultBook().getISBN()+i);
+    }
+    for (int i = 0; i < NUM_REPS; i++) {
+      tbs[i] = new TestBuyer(booksToBuy);
+      tgs[i] = new TestGetter(isbns);
+      trss[i] = new Test1StockClient(NUM_REPS, booksToBuy);
+    }
+    for (int i = 0; i < NUM_REPS; i++) {
+      tbs[i].start();
+      tgs[i].start();
+      trss[i].start();
+    }
+
+    for (int i = 0; i < NUM_REPS; i++) {
+      try {
+        tbs[i].join();
+      } catch (InterruptedException e) {
+        fail();
+      }
+      try {
+        tgs[i].join();
+      } catch (InterruptedException e) {
+        fail();
+      }
+      try {
+        trss[i].join();
+      } catch (InterruptedException e) {
+        fail();
+      }
+    }
+
+    for (int i = 0; i < NUM_REPS; i++) {
+      assertTrue(!tgs[i].isInterrupted()
+          && !trss[i].isInterrupted());
+    }
   }
-  
-  
+
   protected class Test1BookClient extends Thread {
     volatile int reps;
     volatile Set<BookCopy> booksToBuy;
@@ -266,10 +332,15 @@ public class ConcurrentBookStoreTest {
   protected class Test2Checker extends Thread {
     volatile List<StockBook> boughtSnap;
     volatile List<StockBook> stockedSnap;
+    boolean interrupted = false;
 
     public Test2Checker(List<StockBook> boughtSnap, List<StockBook> stockedSnap) {
       this.boughtSnap = boughtSnap;
       this.stockedSnap = stockedSnap;
+    }
+
+    public boolean isInterrupted() {
+      return this.interrupted;
     }
 
     public void run() {
@@ -282,7 +353,7 @@ public class ConcurrentBookStoreTest {
         }
         if (snap != null) {
           if (!snap.equals(boughtSnap) && !snap.equals(stockedSnap)) {
-            Thread.currentThread().interrupt();
+            this.interrupted = true;
           }
           ;
         }
@@ -292,19 +363,48 @@ public class ConcurrentBookStoreTest {
 
   protected class TestBuyer extends Thread {
     Set<BookCopy> booksToBuy;
-    
+    boolean interrupted;
+
     public TestBuyer(Set<BookCopy> booksToBuy) {
       this.booksToBuy = booksToBuy;
+      this.interrupted = false;
     }
-    
+
+    public boolean isInterrupted() {
+      return this.interrupted;
+    }
+
     public void run() {
       try {
         client.buyBooks(booksToBuy);
       } catch (BookStoreException e) {
-        Thread.currentThread().interrupt();
+        this.interrupted = true;
       }
       return;
     }
   }
 
+  protected class TestGetter extends Thread {
+    Set<Integer> isbns;
+    boolean interrupted;
+
+    public TestGetter(Set<Integer> isbns) {
+      this.isbns = isbns;
+      this.interrupted = false;
+    }
+
+    public boolean isInterrupted() {
+      return this.interrupted;
+    }
+
+    public void run() {
+      try {
+        storeManager.getBooksByISBN(isbns);
+      } catch (BookStoreException e) {
+
+        this.interrupted = true;
+      }
+      return;
+    }
+  }
 }
