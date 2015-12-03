@@ -1,0 +1,173 @@
+<?xml version="1.0" ?>
+<review for-group="Carlqvist_Alexander__krt300_">
+  <exercises>
+    <question1>
+      <title>Serializability and Locking</title>
+      <schedule1>
+        <text>          Is the solution provided both correct and includes a convincing short
+          argument justifying it?
+        </text>
+        <answer>YES</answer>
+        <comment></comment>
+      </schedule1>
+      <schedule2>
+        <text>          Is the solution provided both correct and includes a convincing short
+          argument justifying it?
+        </text>
+        <answer>Yes</answer>
+        <comment>You correctly identify that the schedule is conflict seriablizable and you locking schedule is also correct. For readability  do not include reads and writes in the locking schedule. </comment>
+      </schedule2>
+    </question1>
+    <question2>
+      <title>Optimistic Concurrency Control</title>
+      <scenario1>
+        <text>          Is the solution provided both correct and includes a convincing short
+          argument justifying it?
+        </text>
+        <answer>YES</answer>
+        <comment>The arguments are correct. The arugments would be clearer if you write out what  conflicts Test 1, Test 2 and Test 3 referene.</comment>
+      </scenario1>
+      <scenario2>
+        <text>          Is the solution provided both correct and includes a convincing short
+          argument justifying it?
+        </text>
+        <answer>YES</answer>
+        <comment></comment>
+      </scenario2>
+      <scenario3>
+        <text>          Is the solution provided both correct and includes a convincing short
+          argument justifying it?
+        </text>
+        <answer>YES</answer>
+        <comment></comment>
+      </scenario3>
+    </question2>
+  </exercises>
+  <programming>
+    <question1>
+      <title>Description of implementation and tests</title>
+      <q1a>
+        <text>          Does the solution contain a clear description of the approach
+          used to achieve before-or-after atomicity?
+        </text>
+        <answer>YES</answer>
+      </q1a>
+      <q1b>
+        <text>          Provide comments on any aspects that you found unclear in the
+          description of the approach to achieve before-or-after atomicity
+        </text>
+        <answer></answer>
+      </q1b>
+      <q1c>
+        <text>
+          Does the code include implementations of Tests 1 and 2 of the
+          assignment description as well as of at least another two test
+          cases?
+        </text>
+        <answer>YES</answer>
+      </q1c>
+      <q1d-i>
+        <text>          
+          Is it tested that the final state resulting from concurrent
+          execution
+          is correct in that it respects invariants designed in the test?
+        </text>
+        <answer>YES</answer>
+      </q1d-i>
+      <q1d-ii>
+        <text>          Is it tested that intermediate reads of the state during concurrent
+          execution respect invariants designed in the test, so that it is
+          arguable that these intermediate states could be found in an
+          equivalent serial schedule?
+        </text>
+        <answer>YES</answer>
+      </q1d-ii>
+      <q1e>
+        <text>          
+          Provide comments on why you found that any portions of the test
+          descriptions were unclear according to the criteria, and suggestions for
+          improvement
+        </text>
+        <answer> For the fourth test performed, it is not entirely clear that it actually tests the durability of the book-store as the system failure is in the client. If we compare this to a serial execution it would be that a queiry was commited and then no more queries were submitted to the book-store. As each of the addbooks is their own transaction.</answer>
+      </q1e>
+    </question1>
+    <question2>
+      <title>Correctness argument for locking protocol</title>
+      <q2a>
+        <text>          Is the variant of 2PL to which equivalence is being established in
+          the correctness argument clearly identified (e.g., conservative, strict,
+          conservative strict)?
+        </text>
+        <answer>NO</answer>
+      </q2a>
+      <q2b>
+        <text>          Is there a sound argumentation of why the steps in the locking
+          protocol designed correspond to steps taken in the chosen variant
+          of 2PL?
+        </text>
+        <answer>YES</answer>
+      </q2b>
+      <q2c>
+        <text>          Is there an argument for the need to take into account predicate
+          reads, with appropriate justification?
+        </text>
+        <answer>NO</answer>
+      </q2c>
+      <q2d>
+        <text>          
+          Is there an argument for the need to take into account predicate
+          reads, with appropriate justification?
+        </text>
+        <answer>With a single lock preducite reads is a nonissue.</answer>
+      </q2d>
+    </question2>
+    <question3>
+      <title>Deadlocks</title>
+      <q3a>
+        <text>          Does the solution contain a correct argument for why deadlocks can
+          occur in the locking protocol or why deadlocks cannot occur?
+        </text>
+        <answer>NO</answer>
+      </q3a>
+      <q3b>
+        <text>          
+          Provide comments on how the argument provided with respect to
+          deadlocks could be improved
+        </text>
+        <answer>
+          It is not entirely clear how deadlock can occur as there is only one lock. Our bookMap is finite and we check for data corruption, hence all process must complete eventually releasing that lock. Would a single lock for each element in the bookMap be enough, what about predicate queires such as get toprated books?
+        </answer>
+      </q3b>
+    </question3>
+    <question4>
+      <title>Reflections on scalability</title>
+      <q4a>
+        <text>          Is there a sound argument about the scalability limits of the
+          concurrent implementation provided?
+        </text>
+        <answer>YES</answer>
+      </q4a>
+      <q4b>
+        <text>          Provide comments on how the reflections on scalability could be
+          improved
+        </text>
+        <answer>The argument for overhead of locking could be extended to scalability, if the gain throughbput is greater than the performence loss due to locking overhead.</answer>
+      </q4b>
+    </question4>
+    <question5>
+      <title>Argumentation on decisions made for performance</title>
+      <q5a>
+        <text>          Is there a sound argument in the solution about the trade-off between
+          locking overhead and concurrency?
+        </text>
+        <answer>YES</answer>
+      </q5a>
+      <q5b>
+        <text>          Provide comments on how the argument about performance trade-offs in
+          the locking protocol could be improved
+        </text>
+        <answer> A more complete argument for why the overhead would increase due to finer granularity and identifing what overhead would make for a stronger argument about the trade-off. For instance does overhead include busy waiting in the locking protocol?</answer>
+      </q5b>
+    </question5>
+  </programming>
+</review>
