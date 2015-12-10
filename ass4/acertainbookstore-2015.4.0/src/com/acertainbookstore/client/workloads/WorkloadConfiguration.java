@@ -24,9 +24,13 @@ public class WorkloadConfiguration {
 	private StockManager stockManager = null;
 	private BookStore bookStore = null;
 
+	// added fields
+	 private int titleLenght = 10;
+   private int authorLenght = 10;
+
 	public WorkloadConfiguration(BookStore bookStore, StockManager stockManager) throws Exception {
 		// Create a new one so that it is not shared
-		bookSetGenerator = new BookSetGenerator();
+		bookSetGenerator = new BookSetGenerator(this.titleLenght,this.authorLenght);
 		this.bookStore = bookStore;
 		this.stockManager = stockManager;
 	}
