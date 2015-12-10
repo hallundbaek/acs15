@@ -3,14 +3,12 @@
  */
 package com.acertainbookstore.client.workloads;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.utils.BookStoreException;
+import org.eclipse.jetty.webapp.Configuration;
 
 /**
  * 
@@ -124,7 +122,17 @@ public class Worker implements Callable<WorkerRunResult> {
 	 * @throws BookStoreException
 	 */
 	private void runFrequentStockManagerInteraction() throws BookStoreException {
-		// TODO: Add code for Stock Replenishment Interaction
+    List<StockBook> snapShot = configuration.getStockManager().getBooks();
+    Collections.sort(snapShot, new Comparator<StockBook>() {
+      @Override
+      public int compare(StockBook b1, StockBook b2) {
+        int a = b1.getNumCopies();
+        int b = b2.getNumCopies();
+        return (a>b ? -1 : (a==b ? 0 : 1));
+      }
+    });
+    Set<StockBook> booksToAdd = new HashSet<>(snapShot.subList(0,configuration.getNumBooksWithLeastCopies() - 1));
+    configuration.getStockManager().addBooks(booksToAdd);
 	}
 
 	/**
