@@ -4,18 +4,23 @@
 package com.acertainbookstore.client.workloads;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.acertainbookstore.business.CertainBookStore;
+import com.acertainbookstore.business.ImmutableStockBook;
+import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.client.BookStoreHTTPProxy;
 import com.acertainbookstore.client.StockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
 
 /**
  * 
@@ -102,6 +107,10 @@ public class CertainWorkload {
 	 */
 	public static void initializeBookStoreData(BookStore bookStore,
 			StockManager stockManager) throws BookStoreException {
-	  return;
+	  Set<StockBook> initBooks = new HashSet<>();
+	  for(int i = 1; i <= 10; i++){
+	  initBooks.add(new ImmutableStockBook(i, "BookProject"+i, "Monkey"+i, i, 5, 0, 0, 0, true));
+	  }
+	  stockManager.addBooks(initBooks);
 	}
 }
