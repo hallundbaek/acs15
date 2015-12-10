@@ -133,8 +133,12 @@ public class Worker implements Callable<WorkerRunResult> {
         return (a>b ? -1 : (a==b ? 0 : 1));
       }
     });
-    Set<StockBook> booksToAdd = new HashSet<>(snapShot.subList(0,configuration.getNumBooksWithLeastCopies() - 1));
-    configuration.getStockManager().addBooks(booksToAdd);
+    Set<StockBook> booksToAdd = new HashSet<>(snapShot.subList(0,configuration.getNumBooksWithLeastCopies()));
+    Set<BookCopy> bookCopiesToAdd = new HashSet<>();
+    for(StockBook b : booksToAdd) {
+      bookCopiesToAdd.add(new BookCopy(b.getISBN(),configuration.getNumAddCopies()));
+    }
+    configuration.getStockManager().addCopies(bookCopiesToAdd);
 	}
 
 	/**
@@ -154,7 +158,6 @@ public class Worker implements Callable<WorkerRunResult> {
 		for(Integer isbn : isbnsToBuy) {
 		  booksToBuy.add(new BookCopy(isbn, configuration.getNumBookCopiesToBuy()));
 		}
-		
 		configuration.getBookStore().buyBooks(booksToBuy);
 	}
 

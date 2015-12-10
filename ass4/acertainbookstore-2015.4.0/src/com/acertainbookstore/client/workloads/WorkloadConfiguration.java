@@ -140,5 +140,4 @@ public class WorkloadConfiguration {
 	public void setBookSetGenerator(BookSetGenerator bookSetGenerator) {
 		this.bookSetGenerator = bookSetGenerator;
 	}
-
 }

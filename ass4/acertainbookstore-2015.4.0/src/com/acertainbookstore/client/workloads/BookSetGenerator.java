@@ -1,7 +1,10 @@
 package com.acertainbookstore.client.workloads;
 
 import java.awt.event.ItemEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
@@ -48,22 +51,9 @@ public class BookSetGenerator {
    * @return
    */
   public Set<Integer> sampleFromSetOfISBNs(Set<Integer> isbns, int num) {
-    Set<Integer> res = new HashSet<Integer>();
-    int n = isbns.size();
-    if (num > n / 2) {
-      Set<Integer> nSet = sampleFromSetOfISBNs(isbns, n - num);
-      for (Integer isbn : isbns) {
-        if (!nSet.contains(isbn)) {
-          res.add(isbn);
-        }
-      }
-    }
-    else {
-      while (res.size() < num) {
-        res.add(ran.nextInt(n));
-      }
-    }
-    return res;
+    List<Integer> l = new ArrayList<>(isbns);
+    Collections.shuffle(l);
+    return new HashSet<Integer>(l.subList(0, num));
   }
 
   /**
@@ -83,7 +73,7 @@ public class BookSetGenerator {
       for(int i = 0; i < titleLength; i++) {
         title[i] = chars[ran.nextInt(chars.length)];
       }
-      res.add(new ImmutableStockBook(ran.nextInt(), title.toString(), author.toString(), ran.nextInt(100), ran.nextInt(10),
+      res.add(new ImmutableStockBook(ran.nextInt(Integer.MAX_VALUE-1)+1, title.toString(), author.toString(), 1, 100,
           0, 0, 0, true));
     }
     return res;
