@@ -108,8 +108,8 @@ public class CertainWorkload {
 	public static void initializeBookStoreData(BookStore bookStore,
 			StockManager stockManager) throws BookStoreException {
 	  Set<StockBook> initBooks = new HashSet<>();
-	  for(int i = 1; i <= 10; i++){
-	  initBooks.add(new ImmutableStockBook(i, "BookProject"+i, "Monkey"+i, i, 5, 0, 0, 0, true));
+	  for(int i = 0; i <= 9; i++){
+	  initBooks.add(new ImmutableStockBook(i, "BookPrjct"+i, "MonkeyNum"+i, i, 5, 0, 0, 0, true));
 	  }
 	  stockManager.addBooks(initBooks);
 	}
