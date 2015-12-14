@@ -24,7 +24,6 @@ public class BookSetGenerator {
   private static final char[] chars;
   private int titleLength;
   private int authorLength;
-  
   static {
     StringBuilder tmp = new StringBuilder();
     for(char c = '0'; c <= '9'; c++) {

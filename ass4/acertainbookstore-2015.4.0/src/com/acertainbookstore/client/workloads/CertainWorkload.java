@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -43,8 +44,8 @@ public class CertainWorkload {
    * @param args
    */
   public static void main(String[] args) throws Exception {
-    int numConcurrentWorkloadThreads = 10;
-    String serverAddress = "http://localhost:8081";
+    int numConcurrentWorkloadThreads = 2;
+        String serverAddress = "http://localhost:8081";
     boolean localTest = true;
     List<WorkerRunResult> workerRunResults = new ArrayList<WorkerRunResult>();
     List<Future<WorkerRunResult>> runResults = new ArrayList<Future<WorkerRunResult>>();
@@ -70,33 +71,38 @@ public class CertainWorkload {
 
     // Generate data in the bookstore before running the workload
     initializeBookStoreData(bookStore, stockManager);
+    while (numConcurrentWorkloadThreads <= 32) {
+      if (numConcurrentWorkloadThreads == 32) {
+        numConcurrentWorkloadThreads = 24;
+      }
+      ExecutorService exec = Executors
+          .newFixedThreadPool(numConcurrentWorkloadThreads);
 
-    ExecutorService exec = Executors
-        .newFixedThreadPool(numConcurrentWorkloadThreads);
+      for (int i = 0; i < numConcurrentWorkloadThreads; i++) {
+        WorkloadConfiguration config = new WorkloadConfiguration(bookStore,
+            stockManager);
+        Worker workerTask = new Worker(config);
+        // Keep the futures to wait for the result from the thread
+        runResults.add(exec.submit(workerTask));
+      }
 
-    for (int i = 0; i < numConcurrentWorkloadThreads; i++) {
-      WorkloadConfiguration config = new WorkloadConfiguration(bookStore,
-          stockManager);
-      Worker workerTask = new Worker(config);
-      // Keep the futures to wait for the result from the thread
-      runResults.add(exec.submit(workerTask));
+      // Get the results from the threads using the futures returned
+      for (Future<WorkerRunResult> futureRunResult : runResults) {
+        WorkerRunResult runResult = futureRunResult.get(); // blocking call
+        workerRunResults.add(runResult);
+      }
+
+      exec.shutdownNow(); // shutdown the executor
+
+      // Finished initialization, stop the clients if not localTest
+      if (!localTest) {
+        ((BookStoreHTTPProxy) bookStore).stop();
+        ((StockManagerHTTPProxy) stockManager).stop();
+      }
+
+      reportMetric(workerRunResults);
+      numConcurrentWorkloadThreads *= 2;
     }
-
-    // Get the results from the threads using the futures returned
-    for (Future<WorkerRunResult> futureRunResult : runResults) {
-      WorkerRunResult runResult = futureRunResult.get(); // blocking call
-      workerRunResults.add(runResult);
-    }
-
-    exec.shutdownNow(); // shutdown the executor
-
-    // Finished initialization, stop the clients if not localTest
-    if (!localTest) {
-      ((BookStoreHTTPProxy) bookStore).stop();
-      ((StockManagerHTTPProxy) stockManager).stop();
-    }
-
-    reportMetric(workerRunResults);
   }
 
   /**
@@ -122,9 +128,9 @@ public class CertainWorkload {
 
     List<String> lines = Arrays.asList("throughput=" + (int) aggrThroughput,
         "latency=" + totElapsed / workerRunResults.size());
-    Path file = Paths.get("./test/" + workerRunResults.hashCode() + ".txt");
+    Path file = Paths.get("./test/dataOfflineNewNew.txt");
     try {
-      Files.write(file, lines, Charset.forName("UTF-8"));
+      Files.write(file, lines, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
