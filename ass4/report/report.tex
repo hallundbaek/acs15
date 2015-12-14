@@ -171,7 +171,20 @@ The set of LSNs that identify log records that must be undone during the undo ph
 The table~\ref{crs} represents the log after recovery has been completed. Neither the analysis nor redo phase will write anything to the log. The redo phase could write end type record if there were any committed transactions that had not been ended, however, this is not the case. The undo phase will iterate over all loser transactions undoing the highest current LSN until the \texttt{LAST\_LSN} is \texttt{NULL} by which the transaction will be ended.
 \section{Performance Measurements}
 \begin{enumerate}
-\item
-\item
+  \item
+  \item Figure \ref{goodput} and \ref{latency} show the goodput and latency benchmarks respectively. The plots show the curves for the executions in the same address space, called offline, and one for executions across address spaces, called online. We can see the goodput is rising in the offline version wheras it is falling drastically in the online version, this is due to the fact that the online version in the current handout cannot handle concurrent requests, wheras the offline version handles this fine. Which is why we see an increasing goodput the more concurrent requests we get in the offline version. The latency of the two seem to both follow an exponential function, where the online has a much higher factor. You would expect the latency of the online version to be much higher than that of the offline, as there is a smaller overhead when doing executionins in the same address space, compared to the same across address spaces.
+    \begin{figure}[H]
+      \center
+      \includegraphics[width=0.7\textwidth]{./goodput.pdf}
+      \caption{The goodput benchmark of the online and offline version of acertainbookstore. The data has been normalized.}
+      \label{goodput}
+    \end{figure}
+    \begin{figure}[H]
+      \center
+      \includegraphics[width=0.7\textwidth]{./latency.pdf}
+      \caption{The latency benchmark of the online and offline version of acertainbookstore. The data has been normalized.}
+      \label{latency}
+    \end{figure}
+  \item The workloads seem reliable to predict the performance of the bookstore, but it depends on whether or not the division of labour corresponds with that of actual execution. The latency and goodput are two metrics worth measuring when benchmarking the system, as these metrics are highly in focus when designing such a system. Another metric to measure would be the overhead of the two versions of the system, this is going to correalate with the latency, but to which degree could be interesting.
 \end{enumerate}
 \end{document}
