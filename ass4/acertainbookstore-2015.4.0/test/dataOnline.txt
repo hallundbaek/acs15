@@ -1,0 +1,16 @@
+throughput=149
+latency=0.3448439135
+throughput=121
+latency=0.4273422516
+throughput=120
+latency=0.8377316752
+throughput=36
+latency=0.9945527569000001
+throughput=58
+latency=3.4555518776000005
+throughput=57
+latency=10.068108086399999
+throughput=28
+latency=18.227369505000002
+throughput=18
+latency=54.7373376992
